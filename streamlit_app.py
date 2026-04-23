@@ -178,15 +178,15 @@ for i in range(252, len(returns)):
     ES_95_n = mu - sigma * (norm.pdf(z_95) / 0.05)
     ES_99_n = mu - sigma * (norm.pdf(z_99) / 0.01)
 
-    rolling_results.iloc[t, rolling_results.columns.get_loc('VaR_95_hist')] = VaR_95_h
-    rolling_results.iloc[t, rolling_results.columns.get_loc('ES_95_hist')] = ES_95_h
-    rolling_results.iloc[t, rolling_results.columns.get_loc('VaR_99_hist')] = VaR_99_h
-    rolling_results.iloc[t, rolling_results.columns.get_loc('ES_99_hist')] = ES_99_h
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_hist')] = VaR_95_h
+    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_95_hist')] = ES_95_h
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_hist')] = VaR_99_h
+    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_99_hist')] = ES_99_h
 
-    rolling_results.iloc[t, rolling_results.columns.get_loc('VaR_95_norm')] = VaR_95_n
-    rolling_results.iloc[t, rolling_results.columns.get_loc('ES_95_norm')] = ES_95_n
-    rolling_results.iloc[t, rolling_results.columns.get_loc('VaR_99_norm')] = VaR_99_n
-    rolling_results.iloc[t, rolling_results.columns.get_loc('ES_99_norm')] = ES_99_n
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_norm')] = VaR_95_n
+    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_95_norm')] = ES_95_n
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_norm')] = VaR_99_n
+    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_99_norm')] = ES_99_n
     violations = rolling_results['Returns'] < rolling_results['VaR_95_hist']
 
 # ---------------------------
@@ -203,7 +203,7 @@ except:
 # ---------------------------
 st.subheader("📉 Returns vs VaR")
 
-plot_data = rolling_results.dropna()
+plot_data = rolling_results.copy()
 
 if use_plotly:
     fig = go.Figure()
