@@ -15,13 +15,13 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url("https://images.unsplash.com/photo-1621761191319-c6fb62004040");
+        background-image: url("https://images.unsplash.com/photo-1611078489935-0cb964de46d6");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }
 
-
+    /* 🔥 overlay bien oscuro (esto garantiza negro sí o sí) */
     .stApp::before {
         content: "";
         position: fixed;
@@ -29,22 +29,17 @@ st.markdown(
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.75); /* más oscuro */
+        background: rgba(0, 0, 0, 0.9); /* casi negro total */
         z-index: -1;
     }
 
-    
     h1, h2, h3, h4, h5, h6, p, div, span {
-        color: #f5f5f5 !important;
-    }
-
-
-    [data-testid="stMetricValue"] {
-        color: #00ffcc;
+        color: #f0f0f0 !important;
     }
     </style>
     """,
     unsafe_allow_html=True
+)
 )
 @st.cache_data
 def get_data():
