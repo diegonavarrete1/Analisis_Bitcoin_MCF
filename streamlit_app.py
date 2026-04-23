@@ -71,15 +71,30 @@ def var_es_normal(returns, alpha):
 
     return VaR, ES
 
+def vfrom scipy.stats import t as student_t
+
 def var_es_t(returns, alpha):
-    gl, med, disp = t.fit(returns)
+    returns = pd.Series(returns)
 
-    x = t.ppf(1 - alpha, gl)
+    # 🧹 LIMPIEZA FUERTE
+    returns = returns.replace([np.inf, -np.inf], np.nan)
+    returns = returns.dropna()
 
-    VaR = med + disp * x
+    # 🔒 convertir a numpy puro
+    returns = returns.astype(float).values
 
-    ES = med + disp * (
-        (t.pdf(x, gl) / (1 - alpha)) * (gl + x**2) / (gl - 1)
+    # ⚠️ evitar errores si queda vacío
+    if len(returns) < 10:
+        return np.nan, np.nan
+
+    df, loc, scale = student_t.fit(returns)
+
+    x = student_t.ppf(1 - alpha, df)
+
+    VaR = loc + scale * x
+
+    ES = loc + scale * (
+        (student_t.pdf(x, df) / (1 - alpha)) * (df + x**2) / (df - 1)
     )
 
     return VaR, ES
