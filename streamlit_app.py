@@ -11,35 +11,71 @@ st.set_page_config(
     page_icon="📉",
     layout="wide"
 )
-st.markdown(
-    """
+import base64
+import streamlit as st
+
+def set_premium_ui():
+    with open("assets/bitcoin.png", "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+
+    st.markdown(f"""
     <style>
-    .stApp {
-        background-image: url("https://images.unsplash.com/photo-1611078489935-0cb964de46d6");
+
+    /* 🌌 Fondo */
+    .stApp {{
+        background-image: url("data:image/png;base64,{b64}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-    }
+    }}
 
-    /* 🔥 overlay bien oscuro (esto garantiza negro sí o sí) */
-    .stApp::before {
+    /* 🌑 Overlay oscuro */
+    .stApp::before {{
         content: "";
         position: fixed;
-        top: 0;
-        left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.9); /* casi negro total */
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(6px);
         z-index: -1;
-    }
+    }}
 
-    h1, h2, h3, h4, h5, h6, p, div, span {
-        color: #f0f0f0 !important;
-    }
+    /* 🧊 Glass cards */
+    .block-container {{
+        background: rgba(20, 20, 20, 0.55);
+        backdrop-filter: blur(12px);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }}
+
+    /* ✨ Texto */
+    h1, h2, h3, h4, h5, h6, p, div, span {{
+        color: #f5f5f5 !important;
+    }}
+
+    /* 💎 Métricas */
+    [data-testid="stMetric"] {{
+        background: rgba(0,0,0,0.4);
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }}
+
+    [data-testid="stMetricValue"] {{
+        color: #00ffc6;
+        font-size: 28px;
+    }}
+
+    /* 📊 Gráficas más limpias */
+    canvas {{
+        border-radius: 12px;
+    }}
+
     </style>
-    """,
-    unsafe_allow_html=True
-)
+    """, unsafe_allow_html=True)
+
+set_premium_ui()
 @st.cache_data
 def get_data():
     ticker = "BTC-USD"
