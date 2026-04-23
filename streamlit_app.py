@@ -366,4 +366,42 @@ if use_plotly:
 
 else:
     st.line_chart(plot_data[cols])
-        
+    violations_results = []
+
+for alpha in [0.95, 0.975, 0.99]:
+
+    var_violations = 0
+    es_violations = 0
+    total = 0
+
+    for i in range(252, len(returns)):
+
+        window = returns.iloc[i-252:i]
+        r_t = returns.iloc[i]
+
+        # puedes elegir método (ejemplo: t)
+        VaR, ES = var_es_t(window, alpha)
+
+        if np.isnan(VaR) or np.isnan(ES):
+            continue
+
+        total += 1
+
+        # 🚨 violaciones
+        if r_t < VaR:
+            var_violations += 1
+
+        if r_t < ES:
+            es_violations += 1
+
+    violations_results.append({
+        "Alpha": alpha,
+        "VaR Violations": var_violations,
+        "VaR %": var_violations / total,
+        "ES Violations": es_violations,
+        "ES %": es_violations / total
+    })
+
+df_viol = pd.DataFrame(violations_results)
+st.subheader("📉 Backtesting de VaR y ES")
+st.dataframe(df_viol)
