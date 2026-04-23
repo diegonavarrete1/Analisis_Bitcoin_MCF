@@ -15,13 +15,13 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url("https://images.unsplash.com/photo-1518546305927-5a555bb7020d");
+        background-image: url("https://images.unsplash.com/photo-1621761191319-c6fb62004040");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }
-    
-    /* Opcional: oscurecer para que el texto se vea mejor */
+
+
     .stApp::before {
         content: "";
         position: fixed;
@@ -29,8 +29,18 @@ st.markdown(
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.75); /* más oscuro */
         z-index: -1;
+    }
+
+    
+    h1, h2, h3, h4, h5, h6, p, div, span {
+        color: #f5f5f5 !important;
+    }
+
+
+    [data-testid="stMetricValue"] {
+        color: #00ffcc;
     }
     </style>
     """,
