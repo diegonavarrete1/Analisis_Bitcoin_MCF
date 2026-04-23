@@ -107,23 +107,46 @@ from scipy.stats import t as student_t
 
 from scipy.stats import t as student_t
 
+from scipy.stats import t as student_t
+
 def var_es_t(returns, alpha):
-    returns = pd.Series(returns).dropna()
-    returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
+    returns = pd.Series(returns)
 
-    returns = returns.astype(float).values
+    # 🧹 limpieza completa
+    returns = returns.replace([np.inf, -np.inf], np.nan)
+    returns = returns.dropna()
 
-    df, loc, scale = student_t.fit(returns)
+    # 🔒 asegurar tipo numérico
+    returns = pd.to_numeric(returns, errors='coerce').dropna()
 
-    # cuantil de cola izquierda
-    x = student_t.ppf(1 - alpha, df)
+    # 🔥 evitar casos degenerados
+    if len(returns) < 20:
+        return np.nan, np.nan
 
-    VaR = loc + scale * x
+    if returns.std() == 0:
+        return np.nan, np.nan
 
-    # 🔥 CORRECCIÓN CLAVE (signo negativo)
-    ES = loc - scale * (
-        (student_t.pdf(x, df) / (1 - alpha)) * (df + x**2) / (df - 1)
-    )
+    data = returns.values
+
+    try:
+        df, loc, scale = student_t.fit(data)
+
+        # evitar df problemático
+        if df <= 2:
+            return np.nan, np.nan
+
+        x = student_t.ppf(1 - alpha, df)
+
+        VaR = loc + scale * x
+
+        ES = loc - scale * (
+            (student_t.pdf(x, df) / (1 - alpha)) * (df + x**2) / (df - 1)
+        )
+
+        return VaR, ES
+
+    except Exception as e:
+        return np.nan, np.nan
 
     return VaR, ES
 def var_es_hist(returns, alpha):
