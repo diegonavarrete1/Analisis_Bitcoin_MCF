@@ -99,15 +99,23 @@ def var_es_t(returns, alpha):
 
     return VaR, ES
 def var_es_hist(returns, alpha):
-    sorted_returns = returns.sort_values()
+    sorted_returns = pd.Series(returns).dropna().sort_values()
 
-    index = int((1 - alpha) * len(sorted_returns))
+    n = len(sorted_returns)
 
-    VaR = sorted_returns.iloc[index] #El inicio de las peores perdidas
+    if n < 10:
+        return np.nan, np.nan
+
+    index = int((1 - alpha) * n)
+
+    # 🔒 CLAMP del índice
+    index = max(1, min(index, n - 1))
+
+    VaR = sorted_returns.iloc[index]
+
     ES = sorted_returns.iloc[:index].mean()
 
     return VaR, ES
-
 def var_es_mc(returns, alpha, n_sim=10000):
     media = returns.mean()
     dev = returns.std()
