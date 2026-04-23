@@ -6,76 +6,58 @@ from scipy.stats import norm
 from scipy.stats import t
 
 # Configuración de la página
-st.set_page_config(
-    page_title="Risk Dashboard",
-    page_icon="📉",
-    layout="wide"
-)
-import base64
-import streamlit as st
+st.markdown("""
+<style>
 
-def set_premium_ui():
-    with open("assets/bitcoin.png", "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
+/* 🌌 Fondo con TU imagen */
+.stApp {
+    background-image: url("https://png.pngtree.com/background/20230520/original/pngtree-bitcoin-on-a-black-background-picture-image_2673444.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
 
-    st.markdown(f"""
-    <style>
+/* 🌑 Oscurecer + blur (CLAVE para look premium) */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.88);  /* 🔥 esto lo hace bien negro */
+    backdrop-filter: blur(8px);
+    z-index: -1;
+}
 
-    /* 🌌 Fondo */
-    .stApp {{
-        background-image: url("data:image/png;base64,{b64}");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    }}
+/* 🧊 GLASS EFFECT */
+.block-container {
+    background: rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.08);
+}
 
-    /* 🌑 Overlay oscuro */
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(6px);
-        z-index: -1;
-    }}
+/* 💎 Métricas estilo fintech */
+[data-testid="stMetric"] {
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 15px;
+}
 
-    /* 🧊 Glass cards */
-    .block-container {{
-        background: rgba(20, 20, 20, 0.55);
-        backdrop-filter: blur(12px);
-        padding: 2rem;
-        border-radius: 20px;
-        border: 1px solid rgba(255,255,255,0.08);
-    }}
+[data-testid="stMetricValue"] {
+    color: #00ffc6;
+    font-size: 28px;
+}
 
-    /* ✨ Texto */
-    h1, h2, h3, h4, h5, h6, p, div, span {{
-        color: #f5f5f5 !important;
-    }}
+/* ✨ texto */
+h1, h2, h3, h4, h5, h6, p, div, span {
+    color: #f5f5f5 !important;
+}
 
-    /* 💎 Métricas */
-    [data-testid="stMetric"] {{
-        background: rgba(0,0,0,0.4);
-        padding: 15px;
-        border-radius: 15px;
-        border: 1px solid rgba(255,255,255,0.05);
-    }}
-
-    [data-testid="stMetricValue"] {{
-        color: #00ffc6;
-        font-size: 28px;
-    }}
-
-    /* 📊 Gráficas más limpias */
-    canvas {{
-        border-radius: 12px;
-    }}
-
-    </style>
-    """, unsafe_allow_html=True)
-
-set_premium_ui()
+</style>
+""", unsafe_allow_html=True)
 @st.cache_data
 def get_data():
     ticker = "BTC-USD"
