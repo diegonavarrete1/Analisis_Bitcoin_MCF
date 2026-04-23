@@ -9,7 +9,7 @@ from scipy.stats import t
 st.markdown("""
 <style>
 
-/* 🌌 Fondo con TU imagen */
+/* 🌌 Fondo */
 .stApp {
     background-image: url("https://png.pngtree.com/background/20230520/original/pngtree-bitcoin-on-a-black-background-picture-image_2673444.jpg");
     background-size: cover;
@@ -17,38 +17,17 @@ st.markdown("""
     background-attachment: fixed;
 }
 
-/* 🌑 Oscurecer + blur (CLAVE para look premium) */
-.stApp::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.88);  /* 🔥 esto lo hace bien negro */
-    backdrop-filter: blur(8px);
-    z-index: -1;
+/* 🔥 overlay SIN romper layout */
+[data-testid="stAppViewContainer"] {
+    background-color: rgba(0, 0, 0, 0.85);
 }
 
-/* 🧊 GLASS EFFECT */
+/* 🧊 glass effect */
 .block-container {
-    background: rgba(20, 20, 20, 0.55);
-    backdrop-filter: blur(14px);
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 2rem;
-    border: 1px solid rgba(255,255,255,0.08);
-}
-
-/* 💎 Métricas estilo fintech */
-[data-testid="stMetric"] {
-    background: rgba(0,0,0,0.5);
-    padding: 15px;
-    border-radius: 15px;
-}
-
-[data-testid="stMetricValue"] {
-    color: #00ffc6;
-    font-size: 28px;
 }
 
 /* ✨ texto */
@@ -58,7 +37,6 @@ h1, h2, h3, h4, h5, h6, p, div, span {
 
 </style>
 """, unsafe_allow_html=True)
-@st.cache_data
 def get_data():
     ticker = "BTC-USD"
     data = yf.download(ticker, start="2010-01-01")
