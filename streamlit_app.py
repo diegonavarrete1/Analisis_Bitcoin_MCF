@@ -11,12 +11,36 @@ st.set_page_config(
     page_icon="📉",
     layout="wide"
 )
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: url("https://images.unsplash.com/photo-1518546305927-5a555bb7020d");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    /* Opcional: oscurecer para que el texto se vea mejor */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: -1;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 @st.cache_data
 def get_data():
     ticker = "BTC-USD"
     data = yf.download(ticker, start="2010-01-01")
 
-    # Ver qué columnas hay
     if 'Adj Close' in data.columns:
         data['Returns'] = data['Adj Close'].pct_change()
     else:
@@ -28,12 +52,10 @@ def get_data():
 
 data = get_data()
 
-# Página principal
 
 st.title("📉 Análisis de Riesgo Financiero")
 st.write("Estimación de Value at Risk (VaR) y Expected Shortfall (ES)")
 
-# Mostrar datos
 st.header("Datos históricos", divider="gray")
 st.write(data.head())
 
@@ -293,10 +315,9 @@ else:
         df_results.set_index("Alpha")
     )
 
-# ---------------------------
-# 📉 ROLLING
-# ---------------------------
-st.subheader("📉 Rolling VaR (252 días)")
+
+# INCISO D
+st.subheader(" Rolling VaR (252 días)")
 
 tipo_rolling = st.selectbox(
     "Tipo de VaR rolling",
