@@ -19,7 +19,7 @@ st.markdown("""
 
 /* 🔥 overlay SIN romper layout */
 [data-testid="stAppViewContainer"] {
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.65);
 }
 
 /* 🧊 glass effect */
