@@ -73,27 +73,23 @@ def var_es_normal(returns, alpha):
 
 from scipy.stats import t as student_t
 
+from scipy.stats import t as student_t
+
 def var_es_t(returns, alpha):
-    returns = pd.Series(returns)
+    returns = pd.Series(returns).dropna()
+    returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
 
-    # 🧹 LIMPIEZA FUERTE
-    returns = returns.replace([np.inf, -np.inf], np.nan)
-    returns = returns.dropna()
-
-    # 🔒 convertir a numpy puro
     returns = returns.astype(float).values
-
-    # ⚠️ evitar errores si queda vacío
-    if len(returns) < 10:
-        return np.nan, np.nan
 
     df, loc, scale = student_t.fit(returns)
 
+    # cuantil de cola izquierda
     x = student_t.ppf(1 - alpha, df)
 
     VaR = loc + scale * x
 
-    ES = loc + scale * (
+    # 🔥 CORRECCIÓN CLAVE (signo negativo)
+    ES = loc - scale * (
         (student_t.pdf(x, df) / (1 - alpha)) * (df + x**2) / (df - 1)
     )
 
