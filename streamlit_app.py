@@ -71,7 +71,7 @@ def var_es_normal(returns, alpha):
 
     return VaR, ES
 
-def vfrom scipy.stats import t as student_t
+from scipy.stats import t as student_t
 
 def var_es_t(returns, alpha):
     returns = pd.Series(returns)
