@@ -40,7 +40,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-)
 @st.cache_data
 def get_data():
     ticker = "BTC-USD"
