@@ -366,8 +366,8 @@ if use_plotly:
 
 else:
     st.line_chart(plot_data[cols])
-    violations_results = []
-
+    
+violations_results = []
 for alpha in [0.95, 0.975, 0.99]:
 
     var_violations = 0
