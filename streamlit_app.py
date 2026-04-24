@@ -433,9 +433,13 @@ if use_plotly:
     ))
 
     st.plotly_chart(fig)
+
 else:
     st.line_chart(plot_data[['Returns','VaR_95_vol','VaR_99_vol']])
-    violations_vol = []
+
+
+# 🔥 FUERA del if/else
+violations_vol = []
 
 for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
 
@@ -462,5 +466,6 @@ for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
     })
 
 df_vol = pd.DataFrame(violations_vol)
+
 st.subheader("📊 Backtesting VaR (Volatilidad móvil)")
 st.dataframe(df_vol)
