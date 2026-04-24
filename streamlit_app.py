@@ -405,3 +405,62 @@ for alpha in [0.95, 0.975, 0.99]:
 df_viol = pd.DataFrame(violations_results)
 st.subheader("📉 Backtesting de VaR y ES")
 st.dataframe(df_viol)
+st.subheader("📉 VaR con volatilidad móvil")
+
+plot_data = rolling_results.dropna(subset=['VaR_95_vol'])
+
+if use_plotly:
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=plot_data.index,
+        y=plot_data['Returns'],
+        name='Returns'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=plot_data.index,
+        y=plot_data['VaR_95_vol'],
+        name='VaR 95% Vol',
+        line=dict(dash='dash')
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=plot_data.index,
+        y=plot_data['VaR_99_vol'],
+        name='VaR 99% Vol',
+        line=dict(dash='dot')
+    ))
+
+    st.plotly_chart(fig)
+else:
+    st.line_chart(plot_data[['Returns','VaR_95_vol','VaR_99_vol']])
+    violations_vol = []
+
+for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
+
+    violations = 0
+    total = 0
+
+    for i in range(252, len(returns)):
+
+        VaR_t = rolling_results.iloc[i][col]
+        r_t = returns.iloc[i]
+
+        if np.isnan(VaR_t):
+            continue
+
+        total += 1
+
+        if r_t < VaR_t:
+            violations += 1
+
+    violations_vol.append({
+        "Alpha": alpha,
+        "Violations": violations,
+        "Percentage": violations / total if total > 0 else np.nan
+    })
+
+df_vol = pd.DataFrame(violations_vol)
+st.subheader("📊 Backtesting VaR (Volatilidad móvil)")
+st.dataframe(df_vol)
