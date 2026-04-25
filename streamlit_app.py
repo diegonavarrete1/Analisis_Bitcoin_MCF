@@ -488,7 +488,7 @@ for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
     "ES Violations": es_violations,
     "ES %": es_violations / total if total != 0 else 0
 })
-    })
+    
 
 df_vol = pd.DataFrame(violations_vol)
 
