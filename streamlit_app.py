@@ -481,10 +481,13 @@ for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
         if r_t < VaR_t:
             violations += 1
 
-    violations_vol.append({
-        "Alpha": alpha,
-        "Violations": violations,
-        "Percentage": violations / total if total > 0 else np.nan
+    violations_results.append({
+    "Alpha": alpha,
+    "VaR Violations": var_violations,
+    "VaR %": var_violations / total if total != 0 else 0,
+    "ES Violations": es_violations,
+    "ES %": es_violations / total if total != 0 else 0
+})
     })
 
 df_vol = pd.DataFrame(violations_vol)
