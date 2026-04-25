@@ -404,6 +404,28 @@ for alpha in [0.95, 0.975, 0.99]:
 
 df_viol = pd.DataFrame(violations_results)
 st.subheader("📉 Backtesting de VaR y ES")
+# ---------------------------
+# 📉 VaR con volatilidad móvil
+# ---------------------------
+
+rolling_results['VaR_95_vol'] = np.nan
+rolling_results['VaR_99_vol'] = np.nan
+
+for i in range(252, len(returns)):
+
+    window = returns.iloc[i-252:i]
+
+    mu = window.mean()
+    sigma = window.std()  # aquí puedes cambiar a EWMA si quieres más pro
+
+    z_95 = norm.ppf(0.05)
+    z_99 = norm.ppf(0.01)
+
+    VaR_95 = mu + sigma * z_95
+    VaR_99 = mu + sigma * z_99
+
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_vol')] = VaR_95
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_vol')] = VaR_99
 st.dataframe(df_viol)
 st.subheader("📉 VaR con volatilidad móvil")
 
