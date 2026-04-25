@@ -93,23 +93,17 @@ def var_es_normal(returns, alpha):
 
     return VaR, ES
 
-from scipy.stats import t as student_t
-
-from scipy.stats import t as student_t
 
 from scipy.stats import t as student_t
 
 def var_es_t(returns, alpha):
     returns = pd.Series(returns)
 
-    # 🧹 limpieza completa
     returns = returns.replace([np.inf, -np.inf], np.nan)
     returns = returns.dropna()
 
-    # 🔒 asegurar tipo numérico
     returns = pd.to_numeric(returns, errors='coerce').dropna()
 
-    # 🔥 evitar casos degenerados
     if len(returns) < 20:
         return np.nan, np.nan
 
@@ -149,7 +143,6 @@ def var_es_hist(returns, alpha):
 
     index = int((1 - alpha) * n)
 
-    # 🔒 CLAMP del índice
     index = max(1, min(index, n - 1))
 
     VaR = sorted_returns.iloc[index]
@@ -230,18 +223,15 @@ for i in range(252, len(returns)):
     rolling_results.iloc[i, rolling_results.columns.get_loc('ES_99_norm')] = ES_99_n
     violations = rolling_results['Returns'] < rolling_results['VaR_95_hist']
 
-# ---------------------------
-# 🔧 IMPORT SEGURO
-# ---------------------------
+
 try:
     import plotly.graph_objects as go
     use_plotly = True
 except:
     use_plotly = False
 
-# ---------------------------
-# 📉 GRÁFICA PRINCIPAL
-# ---------------------------
+
+# 📉 GRÁFICA 
 st.subheader("📉 Returns vs VaR")
 
 plot_data = rolling_results.copy()
@@ -269,9 +259,9 @@ else:
         plot_data[['Returns', 'VaR_95_hist']]
     )
 
-# ---------------------------
+
 # 📊 VaR y ES
-# ---------------------------
+
 st.header("📊 VaR y Expected Shortfall", divider='red')
 
 metodos = ["Normal", "t-Student", "Histórico", "Monte Carlo"]
@@ -292,9 +282,9 @@ col1, col2 = st.columns(2)
 col1.metric("VaR", f"{VaR:.5f}")
 col2.metric("ES", f"{ES:.5f}")
 
-# ---------------------------
-# 📋 TABLA
-# ---------------------------
+
+# TABLA
+
 st.subheader("📋 Comparación de métodos")
 
 resultados = []
@@ -316,9 +306,8 @@ for a in [0.95, 0.975, 0.99]:
 df_results = pd.DataFrame(resultados)
 st.dataframe(df_results)
 
-# ---------------------------
-# 📊 GRÁFICA COMPARATIVA
-# ---------------------------
+
+# 📊 GRÁFICA 
 st.subheader("📊 Comparación VaR")
 
 if use_plotly:
@@ -366,28 +355,28 @@ if use_plotly:
 
 else:
     st.line_chart(plot_data[cols])
-    
+#PERDIDAS MAYORES, INCISO E)    
 violations_results = []
 for alpha in [0.95, 0.975, 0.99]:
 
     var_violations = 0
     es_violations = 0
     total = 0
+    
 
     for i in range(252, len(returns)):
 
         window = returns.iloc[i-252:i]
         r_t = returns.iloc[i]
 
-        # puedes elegir método (ejemplo: t)
         VaR, ES = var_es_t(window, alpha)
 
         if np.isnan(VaR) or np.isnan(ES):
             continue
 
         total += 1
+#VIOLACIONES
 
-        # 🚨 violaciones
         if r_t < VaR:
             var_violations += 1
 
@@ -404,10 +393,8 @@ for alpha in [0.95, 0.975, 0.99]:
 
 df_viol = pd.DataFrame(violations_results)
 st.subheader("📉 Backtesting de VaR y ES")
-# ---------------------------
-# 📉 VaR con volatilidad móvil
-# ---------------------------
 
+# 📉 VaR 
 rolling_results['VaR_95_vol'] = np.nan
 rolling_results['VaR_99_vol'] = np.nan
 
@@ -416,7 +403,7 @@ for i in range(252, len(returns)):
     window = returns.iloc[i-252:i]
 
     mu = window.mean()
-    sigma = window.std()  # aquí puedes cambiar a EWMA si quieres más pro
+    sigma = window.std() 
 
     z_95 = norm.ppf(0.05)
     z_99 = norm.ppf(0.01)
@@ -459,8 +446,8 @@ if use_plotly:
 else:
     st.line_chart(plot_data[['Returns','VaR_95_vol','VaR_99_vol']])
 
+#INCISO F
 
-# 🔥 FUERA del if/else
 violations_vol = []
 
 for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
