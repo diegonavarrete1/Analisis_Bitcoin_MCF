@@ -481,3 +481,52 @@ df_vol = pd.DataFrame(violations_vol)
 
 st.subheader("📊 Backtesting VaR (Volatilidad móvil)")
 st.dataframe(df_vol)
+# =========================
+# INCISO (e)
+# =========================
+st.header("📉 Inciso (e) — Backtesting")
+
+st.write(df_viol)
+
+
+# =========================
+# INCISO (f)
+# =========================
+st.header("📊 Inciso (f) — VaR Volatilidad Móvil")
+
+st.write("Preview rolling:")
+st.write(rolling_results[['VaR_95_vol','VaR_99_vol']].tail())
+
+
+plot_data = rolling_results.dropna(subset=['VaR_95_vol'])
+
+st.write("Plot data shape:", plot_data.shape)
+
+if len(plot_data) > 0:
+
+    if use_plotly:
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=plot_data.index,
+            y=plot_data['Returns'],
+            name='Returns'
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=plot_data.index,
+            y=plot_data['VaR_95_vol'],
+            name='VaR 95% Vol'
+        ))
+
+        st.plotly_chart(fig)
+
+    else:
+        st.line_chart(plot_data[['Returns','VaR_95_vol']])
+
+else:
+    st.warning("⚠️ No hay datos para graficar VaR vol")
+
+
+st.subheader("📊 Violaciones VaR Vol")
+st.write(df_vol)
