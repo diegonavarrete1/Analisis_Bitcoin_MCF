@@ -3,6 +3,8 @@ NAVARRETE RUVALCABA DIEGO
 MARTINEZ MAYA JULIA
 TRUJILLO MORALES DAFNE SOFIA
 PUEBLITA ZACARIAS ARACELI MICHEL**
+
+#INTRODUCCION
 Bitcoin nació el 31 de octubre de 2008, cuando una entidad o persona bajo el seudónimo de Satoshi Nakamoto publicó el libro blanco titulado *"Bitcoin: A Peer-to-Peer Electronic Cash System"*. Fue una respuesta directa a la crisis financiera global de ese año, diseñada como una alternativa descentralizada al sistema bancario tradicional, permitiendo transacciones de valor sin intermediarios.
 Su comportamiento y la volatilidad que ves en tus análisis pueden explicarse a través de varios hitos clave:
 # Eventos que definen precio
