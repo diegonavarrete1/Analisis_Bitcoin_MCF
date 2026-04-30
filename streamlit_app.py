@@ -357,7 +357,7 @@ else:
     st.line_chart(plot_data[cols])
 #PERDIDAS MAYORES, INCISO E)    
 
-st.header("📉 Inciso (e) — Backtesting")
+st.header("📉 Backtesting")
 
 # Ajuste  sola vez (clave para que no se trabe)
 df_t, loc_t, scale_t = student_t.fit(returns)
@@ -405,7 +405,7 @@ st.dataframe(df_viol)
 # INCISO (f) — VaR con volatilidad móvil
 
 
-st.header("📊 Inciso (f) — VaR Volatilidad Móvil")
+st.header("📊 VaR Volatilidad Móvil")
 
 # Cálculo rolling VaR
 rolling_results['VaR_95_vol'] = np.nan
