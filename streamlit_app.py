@@ -42,9 +42,9 @@ def get_data():
     data = yf.download(ticker, start="2010-01-01")
 
     if 'Adj Close' in data.columns:
-        data['Returns'] = data['Adj Close'].pct_change()
+        data['Retornos'] = data['Adj Close'].pct_change()
     else:
-        data['Returns'] = data['Close'].pct_change()
+        data['Retornos'] = data['Close'].pct_change()
 
     data = data.dropna()
 
@@ -63,15 +63,14 @@ st.write(data.head())
 
 st.header("Rendimientos diarios", divider="gray")
 
-st.line_chart(data['Returns'])
-
+st.line_chart(data['Retornos'])
 
 
 st.header("Estadísticas", divider="gray")
 #INCISO B
-media = data['Returns'].mean()
-sesgo = data['Returns'].skew()
-curtosis = data['Returns'].kurt()
+media = data['Retornos'].mean()
+sesgo = data['Retornos'].skew()
+curtosis = data['Retornos'].kurt()
 
 col1, col2, col3 = st.columns(3)
 
@@ -82,9 +81,9 @@ col3.metric("Curtosis", f"{curtosis:.4f}")
 st.header("VaR y Expected Shortfall", divider= 'red')
 alpha = [0.95, 0.975, 0.99]
 
-def var_es_normal(returns, alpha):
-    mean = returns.mean()
-    std = returns.std()
+def var_es_normal(retornos, alpha):
+    mean = retornos.mean()
+    std = retornos.std()
 
     z = norm.ppf(1 - alpha)
 
@@ -96,35 +95,35 @@ def var_es_normal(returns, alpha):
 
 from scipy.stats import t as student_t
 
-def var_es_t(returns, alpha):
-    returns = pd.Series(returns)
+def var_es_t(retornos, alpha):
+    retornos = pd.Series(retornos)
 
-    returns = returns.replace([np.inf, -np.inf], np.nan)
-    returns = returns.dropna()
+    retornos = retornos.replace([np.inf, -np.inf], np.nan)
+    retornos = retornos.dropna()
 
-    returns = pd.to_numeric(returns, errors='coerce').dropna()
+    retornos = pd.to_numeric(retornos, errors='coerce').dropna()
 
-    if len(returns) < 20:
+    if len(retornos) < 20:
         return np.nan, np.nan
 
-    if returns.std() == 0:
+    if retornos.std() == 0:
         return np.nan, np.nan
 
-    data = returns.values
+    data = retornos.values
 
     try:
-        df, loc, scale = student_t.fit(data)
+        gl, media, desv = student_t.fit(data)
 
-        # evitar df problemático
-        if df <= 2:
+        # evitar gl problemático
+        if gl <= 2:
             return np.nan, np.nan
 
-        x = student_t.ppf(1 - alpha, df)
+        x = student_t.ppf(1 - alpha, gl)
 
-        VaR = loc + scale * x
+        VaR = media + desv * x
 
-        ES = loc - scale * (
-            (student_t.pdf(x, df) / (1 - alpha)) * (df + x**2) / (df - 1)
+        ES = media - desv * (
+            (student_t.pdf(x, gl) / (1 - alpha)) * (gl + x**2) / (gl - 1)
         )
 
         return VaR, ES
@@ -133,10 +132,10 @@ def var_es_t(returns, alpha):
         return np.nan, np.nan
 
     return VaR, ES
-def var_es_hist(returns, alpha):
-    sorted_returns = pd.Series(returns).dropna().sort_values()
+def var_es_hist(retornos, alpha):
+    sorted_retornos = pd.Series(retornos).dropna().sort_values()
 
-    n = len(sorted_returns)
+    n = len(sorted_retornos)
 
     if n < 10:
         return np.nan, np.nan
@@ -145,16 +144,16 @@ def var_es_hist(returns, alpha):
 
     index = max(1, min(index, n - 1))
 
-    VaR = sorted_returns.iloc[index]
+    VaR = sorted_retornos.iloc[index]
 
-    ES = sorted_returns.iloc[:index].mean()
+    ES = sorted_retornos.iloc[:index].mean()
 
     return VaR, ES
-def var_es_mc(returns, alpha, n_sim=10000):
-    media = returns.mean()
-    dev = returns.std()
+def var_es_mc(retornos, alpha, n_sim=10000):
+    media = retornos.mean()
+    dev = retornos.std()
 
-   
+
     sim = np.random.normal(media, dev, n_sim)
 
     # VaR
@@ -165,26 +164,26 @@ def var_es_mc(returns, alpha, n_sim=10000):
 
     return VaR, ES
 
-returns = data['Returns']
+retornos = data['Retornos']
 
-# DataFrame donde guardarás resultados
-rolling_results = pd.DataFrame(index=returns.index) #Necesitamos indice de tiempo
+# DataFrame donde guardarás res
+roll_res = pd.DataFrame(index=retornos.index) #Necesitamos indice de tiempo
 
 # Inicializar columnas
-rolling_results['Returns'] = returns
-rolling_results['VaR_95_hist'] = np.nan
-rolling_results['ES_95_hist'] = np.nan
-rolling_results['VaR_99_hist'] = np.nan
-rolling_results['ES_99_hist'] = np.nan
-rolling_results['VaR_95_norm'] = np.nan
-rolling_results['ES_95_norm'] = np.nan
-rolling_results['VaR_99_norm'] = np.nan
-rolling_results['ES_99_norm'] = np.nan
+roll_res['Retornos'] = retornos
+roll_res['VaR_95_hist'] = np.nan
+roll_res['ES_95_hist'] = np.nan
+roll_res['VaR_99_hist'] = np.nan
+roll_res['ES_99_hist'] = np.nan
+roll_res['VaR_95_norm'] = np.nan
+roll_res['ES_95_norm'] = np.nan
+roll_res['VaR_99_norm'] = np.nan
+roll_res['ES_99_norm'] = np.nan
 
 
-for i in range(252, len(returns)):
+for i in range(252, len(retornos)):
 
-    window_data = returns.iloc[i-252:i]
+    window_data = retornos.iloc[i-252:i]
 
     # HISTÓRICO
     sorted_r = window_data.sort_values()
@@ -212,16 +211,16 @@ for i in range(252, len(returns)):
     ES_95_n = mu - sigma * (norm.pdf(z_95) / 0.05)
     ES_99_n = mu - sigma * (norm.pdf(z_99) / 0.01)
 
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_hist')] = VaR_95_h
-    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_95_hist')] = ES_95_h
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_hist')] = VaR_99_h
-    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_99_hist')] = ES_99_h
+    roll_res.iloc[i, roll_res.columns.get_loc('VaR_95_hist')] = VaR_95_h
+    roll_res.iloc[i, roll_res.columns.get_loc('ES_95_hist')] = ES_95_h
+    roll_res.iloc[i, roll_res.columns.get_loc('VaR_99_hist')] = VaR_99_h
+    roll_res.iloc[i, roll_res.columns.get_loc('ES_99_hist')] = ES_99_h
 
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_norm')] = VaR_95_n
-    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_95_norm')] = ES_95_n
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_norm')] = VaR_99_n
-    rolling_results.iloc[i, rolling_results.columns.get_loc('ES_99_norm')] = ES_99_n
-    violations = rolling_results['Returns'] < rolling_results['VaR_95_hist']
+    roll_res.iloc[i, roll_res.columns.get_loc('VaR_95_norm')] = VaR_95_n
+    roll_res.iloc[i, roll_res.columns.get_loc('ES_95_norm')] = ES_95_n
+    roll_res.iloc[i, roll_res.columns.get_loc('VaR_99_norm')] = VaR_99_n
+    roll_res.iloc[i, roll_res.columns.get_loc('ES_99_norm')] = ES_99_n
+    violacion = roll_res['Retornos'] < roll_res['VaR_95_hist']
 
 
 try:
@@ -231,18 +230,18 @@ except:
     use_plotly = False
 
 
-# 📉 GRÁFICA 
-st.subheader("📉 Returns vs VaR")
+# 📉 GRÁFICA
+st.subheader("📉 Retornos vs VaR")
 
-plot_data = rolling_results.copy()
+plot_data = roll_res.copy()
 
 if use_plotly:
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
         x=plot_data.index,
-        y=plot_data['Returns'],
-        name='Returns'
+        y=plot_data['Retornos'],
+        name='Retornos'
     ))
 
     fig.add_trace(go.Scatter(
@@ -256,7 +255,7 @@ if use_plotly:
 
 else:
     st.line_chart(
-        plot_data[['Returns', 'VaR_95_hist']]
+        plot_data[['Retornos', 'VaR_95_hist']]
     )
 
 
@@ -270,13 +269,13 @@ metodo_sel = st.selectbox("Selecciona método", metodos)
 alpha_sel = st.selectbox("Selecciona nivel de confianza", [0.95, 0.975, 0.99])
 
 if metodo_sel == "Normal":
-    VaR, ES = var_es_normal(returns, alpha_sel)
+    VaR, ES = var_es_normal(retornos, alpha_sel)
 elif metodo_sel == "t-Student":
-    VaR, ES = var_es_t(returns, alpha_sel)
+    VaR, ES = var_es_t(retornos, alpha_sel)
 elif metodo_sel == "Histórico":
-    VaR, ES = var_es_hist(returns, alpha_sel)
+    VaR, ES = var_es_hist(retornos, alpha_sel)
 else:
-    VaR, ES = var_es_mc(returns, alpha_sel)
+    VaR, ES = var_es_mc(retornos, alpha_sel)
 
 col1, col2 = st.columns(2)
 col1.metric("VaR", f"{VaR:.5f}")
@@ -287,15 +286,15 @@ col2.metric("ES", f"{ES:.5f}")
 
 st.subheader("📋 Comparación de métodos")
 
-resultados = []
+res = []
 
 for a in [0.95, 0.975, 0.99]:
-    var_n, es_n = var_es_normal(returns, a)
-    var_t, es_t = var_es_t(returns, a)
-    var_h, es_h = var_es_hist(returns, a)
-    var_mc, es_mc = var_es_mc(returns, a)
+    var_n, es_n = var_es_normal(retornos, a)
+    var_t, es_t = var_es_t(retornos, a)
+    var_h, es_h = var_es_hist(retornos, a)
+    var_mc, es_mc = var_es_mc(retornos, a)
 
-    resultados.append({
+    res.append({
         "Alpha": a,
         "VaR Normal": var_n,
         "VaR t": var_t,
@@ -303,11 +302,11 @@ for a in [0.95, 0.975, 0.99]:
         "VaR MC": var_mc,
     })
 
-df_results = pd.DataFrame(resultados)
+df_results = pd.DataFrame(res)
 st.dataframe(df_results)
 
 
-# GRÁFICA 
+# GRÁFICA
 st.subheader("📊 Comparación VaR")
 
 if use_plotly:
@@ -337,9 +336,9 @@ tipo_rolling = st.selectbox(
 )
 
 if tipo_rolling == "Histórico":
-    cols = ['Returns', 'VaR_95_hist', 'ES_95_hist']
+    cols = ['Retornos', 'VaR_95_hist', 'ES_95_hist']
 else:
-    cols = ['Returns', 'VaR_95_norm', 'ES_95_norm']
+    cols = ['Retornos', 'VaR_95_norm', 'ES_95_norm']
 
 if use_plotly:
     fig2 = go.Figure()
@@ -355,49 +354,49 @@ if use_plotly:
 
 else:
     st.line_chart(plot_data[cols])
-#PERDIDAS MAYORES, INCISO E)    
+#PERDIDAS MAYORES, INCISO E)
 
 st.header("📉 Backtesting")
 
 # Ajuste  sola vez (clave para que no se trabe)
-df_t, loc_t, scale_t = student_t.fit(returns)
+gl_t, media_t, desv_t = student_t.fit(retornos)
 
-violations_results = []
+violacion_results = []
 
 for alpha in [0.95, 0.975, 0.99]:
 
-    var_violations = 0
-    es_violations = 0
+    var_violacion = 0
+    es_violacion = 0
     total = 0
 
-    x = student_t.ppf(1 - alpha, df_t)
+    x = student_t.ppf(1 - alpha, gl_t)
 
-    VaR_const = loc_t + scale_t * x
-    ES_const = loc_t - scale_t * (
-        (student_t.pdf(x, df_t) / (1 - alpha)) * (df_t + x**2) / (df_t - 1)
+    VaR_const = media_t + desv_t * x
+    ES_const = media_t - desv_t * (
+        (student_t.pdf(x, gl_t) / (1 - alpha)) * (gl_t + x**2) / (gl_t - 1)
     )
 
-    for i in range(252, len(returns)):
+    for i in range(252, len(retornos)):
 
-        r_t = returns.iloc[i]
+        r_t = retornos.iloc[i]
         total += 1
 
         if r_t < VaR_const:
-            var_violations += 1
+            var_violacion += 1
 
         if r_t < ES_const:
-            es_violations += 1
+            es_violacion += 1
 
-    violations_results.append({
+    violacion_results.append({
         "Alpha": alpha,
-        "VaR Violations": var_violations,
-        "VaR %": var_violations / total if total != 0 else np.nan,
+        "VaR Violations": var_violacion,
+        "VaR %": var_violacion / total if total != 0 else np.nan,
         "Expected %": 1 - alpha,
-        "ES Violations": es_violations,
-        "ES %": es_violations / total if total != 0 else np.nan
+        "ES Violations": es_violacion,
+        "ES %": es_violacion / total if total != 0 else np.nan
     })
 
-df_viol = pd.DataFrame(violations_results)
+df_viol = pd.DataFrame(violacion_results)
 st.dataframe(df_viol)
 
 
@@ -408,12 +407,12 @@ st.dataframe(df_viol)
 st.header("📊 VaR Volatilidad Móvil")
 
 # Cálculo rolling VaR
-rolling_results['VaR_95_vol'] = np.nan
-rolling_results['VaR_99_vol'] = np.nan
+roll_res['VaR_95_vol'] = np.nan
+roll_res['VaR_99_vol'] = np.nan
 
-for i in range(252, len(returns)):
+for i in range(252, len(retornos)):
 
-    window = returns.iloc[i-252:i]
+    window = retornos.iloc[i-252:i]
 
     mu = window.mean()
     sigma = window.std()
@@ -421,8 +420,8 @@ for i in range(252, len(returns)):
     z_95 = norm.ppf(0.05)
     z_99 = norm.ppf(0.01)
 
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_vol')] = mu + sigma * z_95
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_vol')] = mu + sigma * z_99
+    roll_res.iloc[i, roll_res.columns.get_loc('VaR_95_vol')] = mu + sigma * z_95
+    roll_res.iloc[i, roll_res.columns.get_loc('VaR_99_vol')] = mu + sigma * z_99
 
 
 # GRÁFICA VaR VOL
@@ -430,7 +429,7 @@ for i in range(252, len(returns)):
 
 st.subheader("📉 VaR con volatilidad móvil")
 
-plot_data = rolling_results.dropna(subset=['VaR_95_vol'])
+plot_data = roll_res.dropna(subset=['VaR_95_vol'])
 
 if len(plot_data) == 0:
     st.warning("⚠️ No hay datos para graficar VaR vol")
@@ -442,8 +441,8 @@ else:
 
         fig.add_trace(go.Scatter(
             x=plot_data.index,
-            y=plot_data['Returns'],
-            name='Returns'
+            y=plot_data['Retornos'],
+            name='Retornos'
         ))
 
         fig.add_trace(go.Scatter(
@@ -463,7 +462,7 @@ else:
         st.plotly_chart(fig)
 
     else:
-        st.line_chart(plot_data[['Returns','VaR_95_vol','VaR_99_vol']])
+        st.line_chart(plot_data[['Retornos','VaR_95_vol','VaR_99_vol']])
 
 
 
@@ -472,17 +471,17 @@ else:
 
 st.subheader("📊 Backtesting VaR (Volatilidad móvil)")
 
-violations_vol = []
+violacion_vol = []
 
 for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
 
-    violations = 0
+    violacion = 0
     total = 0
 
-    for i in range(252, len(returns)):
+    for i in range(252, len(retornos)):
 
-        VaR_t = rolling_results.iloc[i][col]
-        r_t = returns.iloc[i]
+        VaR_t = roll_res.iloc[i][col]
+        r_t = retornos.iloc[i]
 
         if np.isnan(VaR_t):
             continue
@@ -490,16 +489,16 @@ for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
         total += 1
 
         if r_t < VaR_t:
-            violations += 1
+            violacion += 1
 
-    violations_vol.append({
+    violacion_vol.append({
         "Alpha": alpha,
-        "VaR Violations": violations,
-        "VaR %": violations / total if total != 0 else np.nan,
+        "VaR Violations": violacion,
+        "VaR %": violacion / total if total != 0 else np.nan,
         "Expected %": 1 - alpha
     })
 
-df_vol = pd.DataFrame(violations_vol)
+df_vol = pd.DataFrame(violacion_vol)
 
 st.dataframe(df_vol)
 
@@ -508,4 +507,4 @@ st.dataframe(df_vol)
 # DEBUG ÚTIL
 
 st.write("Preview rolling:")
-st.write(rolling_results[['VaR_95_vol','VaR_99_vol']].tail())
+st.write(roll_res[['VaR_95_vol','VaR_99_vol']].tail())
