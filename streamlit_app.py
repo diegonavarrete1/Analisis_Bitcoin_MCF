@@ -1,10 +1,15 @@
+#INTEGRANTES**
+#**NAVARRETE RUVALCABA DIEGO**
+#**MARTINEZ MAYA JULIA**
+#**TRUJILLO MORALES DAFNE SOFIA**
+#**PUEBLITA ZACARIAS ARACELI MICHEL**
+
 import streamlit as st
 import pandas as pd
 import yfinance as yf
 import numpy as np
 from scipy.stats import norm
 from scipy.stats import t
-
 # Configuración de la página
 st.markdown("""
 <style>
