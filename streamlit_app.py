@@ -307,7 +307,7 @@ df_results = pd.DataFrame(resultados)
 st.dataframe(df_results)
 
 
-# 📊 GRÁFICA 
+# GRÁFICA 
 st.subheader("📊 Comparación VaR")
 
 if use_plotly:
@@ -394,7 +394,7 @@ for alpha in [0.95, 0.975, 0.99]:
 df_viol = pd.DataFrame(violations_results)
 st.subheader("📉 Backtesting de VaR y ES")
 
-# 📉 VaR 
+#  VaR 
 rolling_results['VaR_95_vol'] = np.nan
 rolling_results['VaR_99_vol'] = np.nan
 
