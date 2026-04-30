@@ -25,7 +25,7 @@ Mirando el gráfico de "Rendimientos diarios":
  * 2020 (El gran pico negativo): Se observa una caída masiva que llega casi al -0.4 (-40%). Esto coincide con el "Crash del COVID" en marzo de 2020. Es el punto que más ensucia la curtosis y obliga al Expected Shortfall a ser tan alto.
    2017-2018: Se nota una dispersión muy alta de puntos azules hacia arriba y hacia abajo, reflejando el mercado alcista de 2017 y el posterior mercado bajista.
    2024-2026: El gráfico muestra una volatilidad que parece "estabilizarse" un poco en comparación con los años salvajes de 2017 o 2020, aunque sigue manteniendo picos constantes por encima del 10% diario.
-   Conclusión Técnica
+**Conclusión Técnica**
 El análisis infiere que Bitcoin no puede medirse con herramientas financieras tradicionales (VaR Normal) de forma segura. El hecho de que el ES sea casi el doble que el VaR en algunos niveles confirma que, cuando Bitcoin rompe sus soportes, lo hace de forma violenta.
 
 
