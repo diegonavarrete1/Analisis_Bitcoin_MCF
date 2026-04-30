@@ -356,45 +356,58 @@ if use_plotly:
 else:
     st.line_chart(plot_data[cols])
 #PERDIDAS MAYORES, INCISO E)    
+
+st.header("📉 Inciso (e) — Backtesting")
+
+# Ajuste  sola vez (clave para que no se trabe)
+df_t, loc_t, scale_t = student_t.fit(returns)
+
 violations_results = []
+
 for alpha in [0.95, 0.975, 0.99]:
 
     var_violations = 0
     es_violations = 0
     total = 0
-    
+
+    x = student_t.ppf(1 - alpha, df_t)
+
+    VaR_const = loc_t + scale_t * x
+    ES_const = loc_t - scale_t * (
+        (student_t.pdf(x, df_t) / (1 - alpha)) * (df_t + x**2) / (df_t - 1)
+    )
 
     for i in range(252, len(returns)):
 
-        window = returns.iloc[i-252:i]
         r_t = returns.iloc[i]
-
-        VaR, ES = var_es_t(window, alpha)
-
-        if np.isnan(VaR) or np.isnan(ES):
-            continue
-
         total += 1
-#VIOLACIONES
 
-        if r_t < VaR:
+        if r_t < VaR_const:
             var_violations += 1
 
-        if r_t < ES:
+        if r_t < ES_const:
             es_violations += 1
 
     violations_results.append({
         "Alpha": alpha,
         "VaR Violations": var_violations,
-        "VaR %": var_violations / total,
+        "VaR %": var_violations / total if total != 0 else np.nan,
+        "Expected %": 1 - alpha,
         "ES Violations": es_violations,
-        "ES %": es_violations / total
+        "ES %": es_violations / total if total != 0 else np.nan
     })
 
 df_viol = pd.DataFrame(violations_results)
-st.subheader("📉 Backtesting de VaR y ES")
+st.dataframe(df_viol)
 
-#  VaR 
+
+
+# INCISO (f) — VaR con volatilidad móvil
+
+
+st.header("📊 Inciso (f) — VaR Volatilidad Móvil")
+
+# Cálculo rolling VaR
 rolling_results['VaR_95_vol'] = np.nan
 rolling_results['VaR_99_vol'] = np.nan
 
@@ -403,50 +416,61 @@ for i in range(252, len(returns)):
     window = returns.iloc[i-252:i]
 
     mu = window.mean()
-    sigma = window.std() 
+    sigma = window.std()
 
     z_95 = norm.ppf(0.05)
     z_99 = norm.ppf(0.01)
 
-    VaR_95 = mu + sigma * z_95
-    VaR_99 = mu + sigma * z_99
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_vol')] = mu + sigma * z_95
+    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_vol')] = mu + sigma * z_99
 
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_95_vol')] = VaR_95
-    rolling_results.iloc[i, rolling_results.columns.get_loc('VaR_99_vol')] = VaR_99
-st.dataframe(df_viol)
+
+# GRÁFICA VaR VOL
+
+
 st.subheader("📉 VaR con volatilidad móvil")
 
 plot_data = rolling_results.dropna(subset=['VaR_95_vol'])
 
-if use_plotly:
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=plot_data.index,
-        y=plot_data['Returns'],
-        name='Returns'
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=plot_data.index,
-        y=plot_data['VaR_95_vol'],
-        name='VaR 95% Vol',
-        line=dict(dash='dash')
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=plot_data.index,
-        y=plot_data['VaR_99_vol'],
-        name='VaR 99% Vol',
-        line=dict(dash='dot')
-    ))
-
-    st.plotly_chart(fig)
-
+if len(plot_data) == 0:
+    st.warning("⚠️ No hay datos para graficar VaR vol")
 else:
-    st.line_chart(plot_data[['Returns','VaR_95_vol','VaR_99_vol']])
+    if use_plotly:
+        import plotly.graph_objects as go
 
-#INCISO F
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=plot_data.index,
+            y=plot_data['Returns'],
+            name='Returns'
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=plot_data.index,
+            y=plot_data['VaR_95_vol'],
+            name='VaR 95%',
+            line=dict(dash='dash')
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=plot_data.index,
+            y=plot_data['VaR_99_vol'],
+            name='VaR 99%',
+            line=dict(dash='dot')
+        ))
+
+        st.plotly_chart(fig)
+
+    else:
+        st.line_chart(plot_data[['Returns','VaR_95_vol','VaR_99_vol']])
+
+
+
+#  Backtesting VaR VOL
+
+
+st.subheader("📊 Backtesting VaR (Volatilidad móvil)")
 
 violations_vol = []
 
@@ -471,59 +495,17 @@ for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
     violations_vol.append({
         "Alpha": alpha,
         "VaR Violations": violations,
-        "VaR %": violations / total if total != 0 else 0
+        "VaR %": violations / total if total != 0 else np.nan,
+        "Expected %": 1 - alpha
     })
 
 df_vol = pd.DataFrame(violations_vol)
 
-st.subheader("📊 Backtesting VaR (Volatilidad móvil)")
 st.dataframe(df_vol)
-# =========================
-# INCISO (e)
-# =========================
-st.header("📉 Inciso (e) — Backtesting")
-
-st.write(df_viol)
 
 
-# =========================
-# INCISO (f)
-# =========================
-st.header("📊 Inciso (f) — VaR Volatilidad Móvil")
+
+# DEBUG ÚTIL
 
 st.write("Preview rolling:")
 st.write(rolling_results[['VaR_95_vol','VaR_99_vol']].tail())
-
-
-plot_data = rolling_results.dropna(subset=['VaR_95_vol'])
-
-st.write("Plot data shape:", plot_data.shape)
-
-if len(plot_data) > 0:
-
-    if use_plotly:
-        fig = go.Figure()
-
-        fig.add_trace(go.Scatter(
-            x=plot_data.index,
-            y=plot_data['Returns'],
-            name='Returns'
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=plot_data.index,
-            y=plot_data['VaR_95_vol'],
-            name='VaR 95% Vol'
-        ))
-
-        st.plotly_chart(fig)
-
-    else:
-        st.line_chart(plot_data[['Returns','VaR_95_vol']])
-
-else:
-    st.warning("⚠️ No hay datos para graficar VaR vol")
-
-
-st.subheader("📊 Violaciones VaR Vol")
-st.write(df_vol)
