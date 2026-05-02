@@ -504,6 +504,31 @@ for alpha, col in [(0.95, 'VaR_95_vol'), (0.99, 'VaR_99_vol')]:
     })
 
 df_vol = pd.DataFrame(violacion_vol)
+df_vol["VaR %"] = df_vol["VaR %"] * 100
+df_vol["Expected %"] = df_vol["Expected %"] * 100
+
+threshold = 2.5
+
+df_vol["¿Menor a 2.5%?"] = df_vol["VaR %"].apply(lambda x: "Sí" if x < threshold else "No")
+
+df_sorted = df_vol.sort_values(by="VaR %", ascending=False)
+
+
+top_mayor = df_sorted.head(3)
+
+top_menor = df_sorted.tail(3).sort_values(by="VaR %")
+
+
+st.subheader("Conclusión automática")
+
+st.write("Métodos con mayor porcentaje de violaciones:")
+st.dataframe(top_mayor)
+
+st.write("Métodos con menor porcentaje de violaciones:")
+st.dataframe(top_menor)
+
+st.info("Para el reporte, interpreta si las violaciones son menores a 2.5%. "
+        "Si el porcentaje es mayor, la estimación no fue suficientemente conservadora.")
 
 st.dataframe(df_vol)
 
