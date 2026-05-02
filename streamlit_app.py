@@ -394,10 +394,10 @@ for alpha in [0.95, 0.975, 0.99]:
 
     violacion_results.append({
         "Alpha": alpha,
-        "VaR Violations": var_violacion,
+        "VaR Violaciones": var_violacion,
         "VaR %": var_violacion / total if total != 0 else np.nan,
         "Expected %": 1 - alpha,
-        "ES Violations": es_violacion,
+        "ES Violaciones": es_violacion,
         "ES %": es_violacion / total if total != 0 else np.nan
     })
 
